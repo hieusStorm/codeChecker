@@ -3,32 +3,38 @@
 function runCode() {
     //collect needed elements
     const userCodetext = document.getElementById('codeEditor');
-    const userArguments = document.getElementById('inputEditor');
+    const userInputs = document.getElementById('inputEditor');
     //create the function
     let userCode = new Function (`return ${userCodetext.value}`);
     let userFunction = userCode();
     //turn the inputs into an array that adjusts based on input type of string, object or array
-    let userFunctionArguments; 
-    //type object 
-    if (userArguments.value.includes('{')) { 
-        userFunctionArguments = userArguments.value.split('},');
+    let userformattedInputs = formatInputs(userInputs.value); 
+    
+    return userFunction(...userformattedInputs);
+}
+
+// Formatt user inputs into an array to be used in there entered function
+function formatInputs(inputs) {
+    let formattedInputs;
+     //type object 
+    if (inputs.includes('{')) { 
+        formattedInputs = inputs.split('},');
         // ensure that each argument has a closing }
-        for (let i = 0; i < userFunctionArguments.length; i++) {
-            if(!userFunctionArguments[i].includes('}')) userFunctionArguments[i] += '}';
+        for (let i = 0; i < formattedInputs.length; i++) {
+            if(!formattedInputs[i].includes('}')) formattedInputs[i] += '}';
         } 
-        userFunctionArguments = userFunctionArguments.map(argument => JSON.parse(argument)); 
+        formattedInputs = formattedInputs.map(argument => JSON.parse(argument)); 
     } 
     //type arrary
-    else if (userArguments.value.includes('[')) {
-        userFunctionArguments = userArguments.value.split('],');
-        userFunctionArguments = userFunctionArguments.map(argument => argument.split(','));
+    else if (inputs.includes('[')) {
+        formattedInputs = inputs.split('],');
+        formattedInputs = formattedInputs.map(argument => argument.split(','));
     }
     // type string
     else { 
-        userArguments.value.split(',');
+       formattedInputs = inputs.split(',');
     }
-
-    return userFunction(...userFunctionArguments);
+    return formattedInputs;
 }
 
 //display the output of the code
