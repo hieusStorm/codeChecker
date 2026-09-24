@@ -48,3 +48,7 @@ const runCodeButton = document.getElementById('runButton');
 runCodeButton.addEventListener('click', ()=> { 
     displayOutput(runCode());
 });
+
+// Might need to be moved to another script not sure yet
+const resetInputsButton = document.getElementById('resetButton');
+resetInputsButton.addEventListener('click', ()=> document.getElementById('inputEditor').value = '');
