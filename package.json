@@ -1,0 +1,27 @@
+{
+  "name": "codechecker",
+  "version": "1.0.0",
+  "description": "A sight to check code functions are working correctly",
+  "homepage": "https://github.com/hieusStorm/codeChecker#readme",
+  "bugs": {
+    "url": "https://github.com/hieusStorm/codeChecker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hieusStorm/codeChecker.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "node --test",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mongodb": "^6.20.0"
+  }
+}

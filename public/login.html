@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="CodeChecker's function testing workspace" />
-    <title>CodeChecker | Function workspace</title>
+    <title>Sign in | CodeChecker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,7 +13,29 @@
     />
     <link rel="stylesheet" href="styles/styles.css" />
   </head>
-  <body>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-card" aria-labelledby="loginTitle">
+        <a class="brand login-brand" href="/" aria-label="CodeChecker home">
+          <span class="brand-mark" aria-hidden="true">{ }</span>
+          <span>CodeChecker</span>
+        </a>
+        <p class="eyebrow">Welcome back</p>
+        <h1 id="loginTitle">Sign in to your workspace</h1>
+        <p class="login-subtitle">Enter your account details to continue.</p>
+        <form id="loginForm" class="login-form" novalidate>
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+          <label for="password">Password</label>
+          <div class="password-field">
+            <input id="password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="Enter your password" />
+            <button id="togglePassword" type="button" aria-label="Show password">Show</button>
+          </div>
+          <p id="loginError" class="login-error" role="alert" aria-live="polite"></p>
+          <button id="loginButton" class="primary-button login-button" type="submit">Sign in</button>
+        </form>
+      </section>
+    </main>
     <div class="app-shell">
       <header class="topbar">
         <a class="brand" href="#" aria-label="CodeChecker home">
