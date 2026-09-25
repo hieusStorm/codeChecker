@@ -61,7 +61,8 @@ function requireAuth(req, res, next) {
 }
 
 app.get("/", (req, res) => {
-  const page = readSession(req) ? "index.html" : "login.html";
+  // const page = readSession(req) ? "index.html" : "login.html";
+  const page = "index.html";
   res.sendFile(path.join(__dirname, "public", page));
 });
 
