@@ -5,19 +5,8 @@ const crypto = require("crypto");
 const path = require("path");
 require("dotenv").config();
 
+function createApp(users, sessionSecret) {
 const app = express();
-const port = Number(process.env.PORT) || 3000;
-const sessionSecret = process.env.SESSION_SECRET;
-
-if (!process.env.MONGODB_URI || !process.env.DB_NAME || !sessionSecret) {
-  console.error("Missing MONGODB_URI, DB_NAME, or SESSION_SECRET in .env");
-  process.exit(1);
-}
-
-const client = new MongoClient(process.env.MONGODB_URI);
-
-let users;
-
 app.use(express.json());
 app.get("/index.html", (req, res, next) => {
   if (!readSession(req)) return res.redirect("/login");
@@ -61,7 +50,8 @@ function requireAuth(req, res, next) {
 }
 
 app.get("/", (req, res) => {
-  const page = readSession(req) ? "index.html" : "login.html";
+  if (!readSession(req)) return res.redirect("/login");
+  const page = "index.html";
   res.sendFile(path.join(__dirname, "public", page));
 });
 
@@ -86,16 +76,30 @@ app.post("/api/login", async (req, res) => {
       email
     });
 
-    if (!user) {
+    if (!user || user.isActive === false) {
       return res.status(401).json({
         message: "Invalid email or password"
       });
     }
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
+    const storedPassword = user.passwordHash;
+    let passwordMatches = false;
+    if (typeof storedPassword === "string" && storedPassword.startsWith("$2")) {
+      passwordMatches = await bcrypt.compare(password, storedPassword);
+    } else if (typeof storedPassword === "string" && storedPassword.length > 0) {
+      // Upgrade legacy plaintext records only after verifying the supplied password.
+      const supplied = crypto.createHash("sha256").update(password).digest();
+      const stored = crypto.createHash("sha256").update(storedPassword).digest();
+      passwordMatches = crypto.timingSafeEqual(supplied, stored);
+      if (passwordMatches) {
+        const passwordHash = await bcrypt.hash(password, 12);
+        const update = await users.updateOne(
+          { _id: user._id, passwordHash: storedPassword },
+          { $set: { passwordHash } }
+        );
+        if (update.matchedCount !== 1) passwordMatches = false;
+      }
+    }
 
     if (!passwordMatches) {
       return res.status(401).json({
@@ -136,8 +140,10 @@ app.get("/api/me", requireAuth, async (req, res) => {
     { _id: new ObjectId(req.session.userId) },
     { projection: { passwordHash: 0 } }
   );
-  if (!user) return res.status(401).json({ message: "Account not found" });
-  res.json({ user });
+  if (!user || user.isActive === false) return res.status(401).json({ message: "Please log in" });
+  res.set("Cache-Control", "no-store");
+  res.json({ user: { id: user._id, username: user.username, email: user.email,
+    firstName: user.firstName, lastName: user.lastName, role: user.role } });
 });
 
 app.post("/api/logout", (_req, res) => {
@@ -145,13 +151,23 @@ app.post("/api/logout", (_req, res) => {
   res.json({ message: "Logged out" });
 });
 
+return app;
+}
+
 async function startServer() {
+  const port = Number(process.env.PORT) || 3000;
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!process.env.MONGODB_URI || !process.env.DB_NAME || !sessionSecret) {
+    throw new Error("Missing MONGODB_URI, DB_NAME, or SESSION_SECRET in .env");
+  }
+  const client = new MongoClient(process.env.MONGODB_URI);
   try {
     await client.connect();
 
     const db = client.db(process.env.DB_NAME);
 
-    users = db.collection("users");
+    const users = db.collection(process.env.USERS_COLLECTION || "CSE");
+    const app = createApp(users, sessionSecret);
 
     console.log("Connected to MongoDB");
 
@@ -161,8 +177,16 @@ async function startServer() {
       );
     });
   } catch (error) {
-    console.error("Database connection failed:", error);
+    await client.close();
+    throw error;
   }
 }
 
-startServer();
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error("Server startup failed:", error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { createApp };
