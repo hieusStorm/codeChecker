@@ -20,7 +20,7 @@ let users;
 
 app.use(express.json());
 app.get("/index.html", (req, res, next) => {
-  if (!readSession(req)) return res.redirect("/index");
+  if (!readSession(req)) return res.redirect("/login");
   next();
 });
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
