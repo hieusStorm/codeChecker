@@ -1,0 +1,4 @@
+MONGODB_URI=mongodb+srv://caarloosdab:Cqsdslllc22@cluster0.iybf6.mongodb.net/
+DB_NAME=CodeChecker
+PORT=3000
+SESSION_SECRET=8fb87ab941ac490493e887de41b437c445351420f30be5c0e92af7724c9eaf38
