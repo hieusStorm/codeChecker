@@ -1,4 +1,6 @@
 const loginForm = document.querySelector("#loginForm");
+const codeInput = document.getElementById("codeEditor");
+const copyButton = document.getElementById("copyButton");
 
 if (loginForm) {
   const email = document.querySelector("#email");
@@ -51,3 +53,17 @@ if (logoutButton) {
     window.location.assign("/login");
   });
 }
+
+copyButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(codeInput.value);
+
+    copyButton.textContent = "Copied!";
+
+    setTimeout(() => {
+      copyButton.textContent = "Copy";
+    }, 1500);
+  } catch (error) {
+    console.error("Failed to copy:", error);
+  }
+});
