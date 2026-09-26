@@ -54,6 +54,7 @@ if (logoutButton) {
   });
 }
 
+// Copy Button
 copyButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(codeInput.value);
@@ -67,3 +68,6 @@ copyButton.addEventListener("click", async () => {
     console.error("Failed to copy:", error);
   }
 });
+
+// Expected Result Field
+const expected = document.getElementById("expectedEditor").value;

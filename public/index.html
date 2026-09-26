@@ -147,6 +147,30 @@
                 <button class="text-button" type="button" id="resetButton">Reset input</button>
               </div>
             </section>
+            <section class="expected-card card">
+              <div class="card-header">
+                <div>
+                  <p class="eyebrow">Expected result</p>
+                  <h2>Expected Output</h2>
+                </div>
+              </div>
+
+              <label class="sr-only" for="expectedEditor">Expected function result</label>
+
+              <textarea
+                class="json-editor"
+                id="expectedEditor"
+                spellcheck="false"
+              >{
+"name": "Ada Lovelace",
+"initials": "AL",
+"joined": "8/24/2024"
+}</textarea>
+
+              <div class="input-footer">
+                <span class="type-label">Object</span>
+              </div>
+            </section>
 
             <section class="output-card card">
               <div class="card-header">
@@ -154,7 +178,9 @@
                   <p class="eyebrow">Last run <span class="run-time" id="runTime">just now</span></p>
                   <h2>Output</h2>
                 </div>
-                <span class="success-badge" id="runBadge"><span>✓</span> Passed</span>
+                <span id="runBadge" data-status="passed">
+                  <span>✓</span> Passed
+                </span>
               </div>
               <pre class="output-display" id="outputDisplay"><code>{
   <span class="key">"name"</span>: <span class="string">"Ada Lovelace"</span>,
