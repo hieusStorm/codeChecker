@@ -81,6 +81,14 @@ button {
     margin-right: 5px; 
     width: 7px; }
 
+.red-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #dc2626;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 .icon-button, .avatar, .new-test-button, .more-button { 
     background: transparent; 
     border: 0; 

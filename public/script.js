@@ -71,3 +71,16 @@ copyButton.addEventListener("click", async () => {
 
 // Expected Result Field
 const expected = document.getElementById("expectedEditor").value;
+
+// Format JSON button
+const formatButton = document.getElementById('formatButton');
+const inputEditor = document.getElementById('inputEditor');
+
+formatButton.addEventListener('click', () => {
+    try {
+        const json = JSON.parse(inputEditor.value);
+        inputEditor.value = JSON.stringify(json, null, 2);
+    } catch (error) {
+        alert('Invalid JSON');
+    }
+});

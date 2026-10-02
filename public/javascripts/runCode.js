@@ -78,8 +78,34 @@ const runCodeButton = document.getElementById('runButton');
         runBadge.style.color = '#dc2626';
         outputMessage.textContent = 'Result does not match expected output';
     }
+
+    updateTestDetails(passed);
 });
 
 // Might need to be moved to another script not sure yet
 const resetInputsButton = document.getElementById('resetButton');
 resetInputsButton.addEventListener('click', ()=> document.getElementById('inputEditor').value = '');
+
+// Details Box
+// Temporary counter until run history is connected to MongoDB
+let runCount = 0;
+
+function updateTestDetails(passed) {
+    const testStatus = document.getElementById('testStatus');
+    const lasrRun = document.getElementById('lastRun');
+    const runCountElement = document.getElementById('runCount');
+
+    if(passed) {
+        testStatus.innerHTML = '<span class="green-dot"></span> Passed';
+    } else {
+        testStatus.innerHTML = '<span class="red-dot"></span> Failed'
+    }
+
+    lastRun.textContent = new Date().toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit'
+    });
+
+    runCount++;
+    runCountElement.textContent = runCount;
+}
