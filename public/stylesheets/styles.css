@@ -458,12 +458,12 @@ h1 {
     margin-left: 5px; 
     text-transform: none; }
 
-.success-badge { background: var(--green-soft); 
-    border-radius: 5px; 
-    color: var(--green); 
-    font-size: 10px; 
-    font-weight: 700; 
-    padding: 6px 8px; }
+#runBadge {
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 6px 8px;
+}
 
 .output-display { 
     background: var(--surface-soft); 

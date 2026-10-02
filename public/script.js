@@ -1,4 +1,6 @@
 const loginForm = document.querySelector("#loginForm");
+const codeInput = document.getElementById("codeEditor");
+const copyButton = document.getElementById("copyButton");
 
 if (loginForm) {
   const email = document.querySelector("#email");
@@ -52,22 +54,20 @@ if (logoutButton) {
   });
 }
 
-const welcomeMessage = document.querySelector("#welcomeMessage");
-if (welcomeMessage) {
-  fetch("/api/me", { cache: "no-store" })
-    .then(async (response) => {
-      if (response.status === 401) {
-        window.location.replace("/login");
-        return;
-      }
-      if (!response.ok) throw new Error("Unable to load your account");
-      const { user } = await response.json();
-      const name = user.firstName || user.username || user.email;
-      welcomeMessage.textContent = `Welcome, ${name}!`;
-      if (logoutButton) {
-        logoutButton.textContent = ((user.firstName?.[0] || name[0]) + (user.lastName?.[0] || "")).toUpperCase();
-        logoutButton.title = `Log out ${name}`;
-      }
-    })
-    .catch(() => { welcomeMessage.textContent = "Unable to load your welcome message. Please refresh to try again."; });
-}
+// Copy Button
+copyButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(codeInput.value);
+
+    copyButton.textContent = "Copied!";
+
+    setTimeout(() => {
+      copyButton.textContent = "Copy";
+    }, 1500);
+  } catch (error) {
+    console.error("Failed to copy:", error);
+  }
+});
+
+// Expected Result Field
+const expected = document.getElementById("expectedEditor").value;
