@@ -1,54 +1,33 @@
-//function to run user entered code
-//Can only take one type of input for arguments currently
+// Each comma-separated JSON value is an argument; an array stays one argument.
+function formatInputs(inputs) { return JSON.parse(`[${inputs}]`); }
 function runCode() {
-    //collect needed elements
-    const userCodetext = document.getElementById('codeEditor');
-    const userInputs = document.getElementById('inputEditor');
-    //create the function
-    let userCode = new Function (`return ${userCodetext.value}`);
-    let userFunction = userCode();
-    //turn the inputs into an array that adjusts based on input type of string, object or array
-    let userformattedInputs = formatInputs(userInputs.value); 
-    
-    return userFunction(...userformattedInputs);
+  const source = document.getElementById("codeEditor").value.trim().replace(/;$/, "");
+  const fn = new Function(`return (${source});`)();
+  if (typeof fn !== "function") throw new Error("Enter a JavaScript function.");
+  return fn(...formatInputs(document.getElementById("inputEditor").value));
 }
-
-// Formatt user inputs into an array to be used in there entered function
-function formatInputs(inputs) {
-    let formattedInputs;
-     //type object 
-    if (inputs.includes('{')) { 
-        formattedInputs = inputs.split('},');
-        // ensure that each argument has a closing }
-        for (let i = 0; i < formattedInputs.length; i++) {
-            if(!formattedInputs[i].includes('}')) formattedInputs[i] += '}';
-        } 
-        formattedInputs = formattedInputs.map(argument => JSON.parse(argument)); 
-    } 
-    //type arrary
-    else if (inputs.includes('[')) {
-        formattedInputs = inputs.split('],');
-        formattedInputs = formattedInputs.map(argument => argument.split(','));
-    }
-    // type string
-    else { 
-       formattedInputs = inputs.split(',');
-    }
-    return formattedInputs;
+function displayOutput(value) {
+  const serialized = JSON.stringify(value, null, 2);
+  document.getElementById("outputDisplay").textContent = serialized === undefined ? String(value) : serialized;
 }
-
-//display the output of the code
-function displayOutput(codeFunction) {
-    const outPutElement = document.getElementById("outputDisplay").firstChild;
-    outPutElement.innerText = JSON.stringify(codeFunction);
-}
-
-//event listeners
-const runCodeButton = document.getElementById('runButton');
-runCodeButton.addEventListener('click', ()=> { 
-    displayOutput(runCode());
+const runCodeButton = document.getElementById("runButton");
+runCodeButton.addEventListener("click", async () => {
+  runCodeButton.disabled = true;
+  const badge = document.getElementById("runBadge");
+  try {
+    displayOutput(await runCode());
+    badge.textContent = "Passed";
+    badge.classList.remove("error-badge");
+  } catch (error) {
+    document.getElementById("outputDisplay").textContent = error.message;
+    badge.textContent = "Failed";
+    badge.classList.add("error-badge");
+  } finally {
+    document.getElementById("runTime").textContent = "just now";
+    runCodeButton.disabled = false;
+  }
 });
-
-// Might need to be moved to another script not sure yet
-const resetInputsButton = document.getElementById('resetButton');
-resetInputsButton.addEventListener('click', ()=> document.getElementById('inputEditor').value = '');
+const initialInput = document.getElementById("inputEditor").value;
+document.getElementById("resetButton").addEventListener("click", () => {
+  document.getElementById("inputEditor").value = initialInput;
+});

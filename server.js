@@ -7,7 +7,11 @@ require("dotenv").config();
 
 function createApp(users, sessionSecret) {
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "16kb" }));
+app.use("/api", (_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 app.get("/index.html", (req, res, next) => {
   if (!readSession(req)) return res.redirect("/login");
   next();
@@ -58,6 +62,41 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   if (readSession(req)) return res.redirect("/");
   res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+app.get("/signup", (req, res) => {
+  if (readSession(req)) return res.redirect("/");
+  res.sendFile(path.join(__dirname, "public", "signup.html"));
+});
+
+app.post("/api/signup", async (req, res) => {
+  const body = req.body && typeof req.body === "object" ? req.body : {};
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";
+  const lastName = typeof body.lastName === "string" ? body.lastName.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  if (!firstName || firstName.length > 80 || lastName.length > 80 ||
+      email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: "Enter your first name and a valid email address. Names must be 80 characters or fewer." });
+  }
+  if (password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
+    return res.status(400).json({ message: "Password must be at least 8 characters and no more than 72 bytes." });
+  }
+  try {
+    if (await users.findOne({ email })) {
+      return res.status(409).json({ message: "An account with this email already exists. Please sign in." });
+    }
+    const passwordHash = await bcrypt.hash(password, 12);
+    await users.insertOne({ email, firstName, lastName, passwordHash,
+      role: "user", isActive: true, createdAt: new Date() });
+    res.status(201).json({ message: "Account created. Please sign in." });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "An account with this email already exists. Please sign in." });
+    }
+    console.error("Registration failed:", error.message);
+    res.status(500).json({ message: "Unable to create your account. Please try again." });
+  }
 });
 
 app.post("/api/login", async (req, res) => {
@@ -151,6 +190,11 @@ app.post("/api/logout", (_req, res) => {
   res.json({ message: "Logged out" });
 });
 
+app.use((error, _req, res, _next) => {
+  const status = error.status === 400 || error.status === 413 ? error.status : 500;
+  res.status(status).json({ message: status === 400 ? "Invalid JSON request" :
+    status === 413 ? "Request is too large" : "Server error. Please try again." });
+});
 return app;
 }
 
@@ -167,6 +211,7 @@ async function startServer() {
     const db = client.db(process.env.DB_NAME);
 
     const users = db.collection(process.env.USERS_COLLECTION || "CSE");
+    await users.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
     const app = createApp(users, sessionSecret);
 
     console.log("Connected to MongoDB");
