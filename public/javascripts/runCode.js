@@ -43,10 +43,41 @@ function displayOutput(codeFunction) {
     outPutElement.innerText = JSON.stringify(codeFunction);
 }
 
+function compareResults(actualResult) {
+    const expectedInput = document.getElementById('expectedEditor').value;
+
+    try {
+        const expectedResult = JSON.parse(expectedInput);
+
+        return JSON.stringify(actualResult) === JSON.stringify(expectedResult);
+    } catch (error) {
+        return String(actualResult).trim() === expectedInput.trim();
+    }
+}
+
 //event listeners
 const runCodeButton = document.getElementById('runButton');
-runCodeButton.addEventListener('click', ()=> { 
-    displayOutput(runCode());
+    runCodeButton.addEventListener('click', ()=> { 
+    const actualResult = runCode();
+
+    displayOutput(actualResult);
+
+    const passed = compareResults(actualResult);
+
+    const runBadge = document.getElementById('runBadge');
+    const outputMessage = document.getElementById('outputMessage');
+
+    if (passed) {
+        runBadge.innerHTML = '<span>✓</span> Passed';
+        runBadge.style.backgroundColor = 'var(--green-soft)';
+        runBadge.style.color = 'var(--green)';
+        outputMessage.textContent = 'Result matches expected output';
+    } else {
+        runBadge.innerHTML = '<span>✗</span> Failed';
+        runBadge.style.backgroundColor = '#fee2e2';
+        runBadge.style.color = '#dc2626';
+        outputMessage.textContent = 'Result does not match expected output';
+    }
 });
 
 // Might need to be moved to another script not sure yet
