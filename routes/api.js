@@ -1,5 +1,6 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
+const bcrypt = require('bcrypt');
 const {parseCookies, createSession, readSession, requireAuth} = require('../session');
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    const users = req.app.get('users');
     const user = await users.findOne({
       email
     });

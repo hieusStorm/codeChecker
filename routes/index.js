@@ -1,12 +1,16 @@
 const express = require('express');
 const { ObjectId } = require("mongodb");
 const {readSession} = require("../session");
+
 const router = express.Router();
 
 
 /* GET home page. */
 router.get('/', async (req, res) => {
-  if (!readSession(req)) return res.redirect('/login');
+  //make sure that the user is logged in
+  const session = readSession(req);
+  if (!session) return res.redirect('/login');
+  //pull the user info from the server
   try {
     // pull the saved code of the logged in user
     const storedCode = req.app.get("storedCode");

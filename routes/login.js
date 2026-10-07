@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const {readSession} = require('../session');
+const {readSession} = require('../session')
+const path = require('path');
+const { title } = require('process');
 
 router.get('/', (req, res) => {
-  if (readSession(req)) return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  const session = readSession(req);
+  if (session) return res.redirect('/');
+  res.render('login', {title});
 });
 
 module.exports = router;
