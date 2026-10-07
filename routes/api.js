@@ -1,44 +1,9 @@
-//server constants
 const express = require('express');
-const { MongoClient } = require('mongodb');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const path = require('path');
-const createError = require('http-errors');
-const {parseCookies, createSession, readSession, requireAuth} = require('./session');
+const { ObjectId } = require('mongodb');
+const {parseCookies, createSession, readSession, requireAuth} = require('../session');
+const router = express.Router();
 
-require('dotenv').config();
-
-// routers
-const indexRouter = require('./routes/index');
-const apiRouter = require('./routes/api');
-const loginrouter = require('./routes/login');
-
-
-function createApp(users, sessionSecret) {
-const app = express();
-app.use(express.json());
-app.get('/index.html', (req, res, next) => {
-  if (!readSession(req)) return res.redirect('/login');
-  next();
-});
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
-
-//make session information readable to the whole app
-app.set('requireAuth', requireAuth);
-
-app.get('/', (req, res) => {
-  if (!readSession(req)) return res.redirect('/login');
-  const page = 'index.html';
-  res.sendFile(path.join(__dirname, 'public', page));
-});
-
-app.get('/login', (req, res) => {
-  if (readSession(req)) return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.post('/api/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
@@ -112,8 +77,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.get('/api/me', requireAuth, async (req, res) => {
-  const { ObjectId } = require('mongodb');
+router.get('/me', requireAuth, async (req, res) => {
   const user = await users.findOne(
     { _id: new ObjectId(req.session.userId) },
     { projection: { passwordHash: 0 } }
@@ -124,53 +88,9 @@ app.get('/api/me', requireAuth, async (req, res) => {
     firstName: user.firstName, lastName: user.lastName, role: user.role } });
 });
 
-app.post('/api/logout', (_req, res) => {
+router.post('/logout', (_req, res) => {
   res.clearCookie('session', { httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV === 'production' });
   res.json({ message: 'Logged out' });
 });
 
-return app;
-}
-
-async function startServer() {
-  const port = Number(process.env.PORT) || 3000;
-  const sessionSecret = process.env.SESSION_SECRET;
-  if (!process.env.MONGODB_URI || !process.env.DB_NAME || !sessionSecret) {
-    throw new Error('Missing MONGODB_URI, DB_NAME, or SESSION_SECRET in .env');
-  }
-  const client = new MongoClient(process.env.MONGODB_URI);
-  try {
-    await client.connect();
-
-    const db = client.db(process.env.DB_NAME);
-
-    const users = db.collection(process.env.USERS_COLLECTION || 'CSE');
-    const storedCode = db.collection('storedCode');
-
-    const app = createApp(users, sessionSecret);
-    app.set('storedCode', storedCode);
-    //set up routes
-    app.set('views', path.join(__dirname, 'views'));
-    app.set('view engine', 'ejs');
-    app.use('/test', app.get('requireAuth'), indexRouter);
-    console.log('Connected to MongoDB');
-
-    app.listen(port, () => {
-      console.log(
-        `Server running at http://localhost:${port}`
-      );
-    });
-  } catch (error) {
-    await client.close();
-    throw error;
-  }
-}
-
-if (require.main === module) {
-  startServer().catch((error) => {
-    console.error('Server startup failed:', error.message);
-    process.exitCode = 1;
-  });
-}
-
-module.exports = { createApp };
+module.exports = router;
