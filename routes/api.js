@@ -1,5 +1,5 @@
 const express = require('express');
-const { ObjectId } = require('mongodb');
+const { ObjectId, MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 const {parseCookies, createSession, readSession, requireAuth} = require('../session');
 const router = express.Router();
@@ -93,6 +93,46 @@ router.get('/me', requireAuth, async (req, res) => {
 router.post('/logout', (_req, res) => {
   res.clearCookie('session', { httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV === 'production' });
   res.json({ message: 'Logged out' });
+});
+
+router.post('/saveCode', async(req, res) => {
+  // collect post data
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const functionName = typeof body.codeName === 'string' ? body.codeName : '';
+  const usserCode = typeof body.code === 'string' ? body.code : '';
+  // make sure post data isn't empty
+  if((functionName == '') || (userCode == '')) throw new Error('Could not collect the function name or the code');
+  //collect user data
+  const user = new ObjectId(req.session.userId);
+  // make sure a function with the same name under the current user already exist
+  const savedCodes = req.app.get('savedCode');
+  const userSavedCodes = await savedCodes.findOne({userID : user, codeName: functionName});
+  if (userSavedCodes) {
+    // update code entry
+    try{
+      const result = await savedCodes.updateOne(
+        {userID : user, codeName: functionName},
+        {$set: {code: userCode}}
+      );
+      res.status(200).json({message:'Code Changes Saved'});
+    }catch(error){
+      res.status(500).json({message:'Server Error', error: error.message});
+    }
+  } else {
+    //add code entry
+    try {
+      const codeEntry = {
+        _id: new ObjectId(),
+        userID: user,
+        code: userCode,
+        codeName: functionName
+      };
+      const result = savedCodes.insertOne(codeEntry);
+      res.status(201).json({message: 'code saved successfully', savedCode: result});
+    } catch(error) {
+      res.status(500).json({message:'Server Error', error: error.message});
+    }
+  }
 });
 
 module.exports = router;

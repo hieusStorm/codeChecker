@@ -4,7 +4,6 @@ const {readSession} = require('../session');
 
 const router = express.Router();
 
-
 /* GET home page. */
 router.get('/', async (req, res) => {
   //make sure that the user is logged in
