@@ -12,9 +12,10 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles/styles.css" />
-    <script src="javascripts/runCode.js" defer></script>
     <script src="./script.js" defer></script>
+    <script src="javascripts/runCode.js" defer></script>
     <script src="javascripts/exportCode.js" defer></script>
+    <script src="javascripts/saveCode.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -25,10 +26,7 @@
         </a>
 
         <div class="topbar-actions">
-          <span class="save-status" id="saveStatus">
-            <span class="status-dot" aria-hidden="true"></span>
-            All changes saved
-          </span>
+          <span class="save-status" id="saveStatus"></span>
           <button class="icon-button" type="button" aria-label="Toggle theme" id="themeToggle">◐</button>
           <button class="avatar" type="button" aria-label="Log out" id="logoutButton">FM</button>
         </div>
