@@ -99,14 +99,15 @@ router.post('/saveCode', async(req, res) => {
   // collect post data
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const functionName = typeof body.codeName === 'string' ? body.codeName : '';
-  const usserCode = typeof body.code === 'string' ? body.code : '';
+  const userCode = typeof body.code === 'string' ? body.code : '';
+  const hiddenUser = typeof body.currentUser === 'string' ? body.userCode : '';
   // make sure post data isn't empty
-  if((functionName == '') || (userCode == '')) throw new Error('Could not collect the function name or the code');
+  if((functionName == '') || (userCode == '') || (hiddenUser == '')) throw new Error('Could not collect needed information');
   //collect user data
-  const user = new ObjectId(req.session.userId);
+  const user = new ObjectId(hiddenUser);
   // make sure a function with the same name under the current user already exist
-  const savedCodes = req.app.get('savedCode');
-  const userSavedCodes = await savedCodes.findOne({userID : user, codeName: functionName});
+  const savedCode = req.app.get('storedCode');
+  const userSavedCodes = await savedCode.findOne({userID : user, codeName: functionName});
   if (userSavedCodes) {
     // update code entry
     try{
@@ -127,7 +128,7 @@ router.post('/saveCode', async(req, res) => {
         code: userCode,
         codeName: functionName
       };
-      const result = savedCodes.insertOne(codeEntry);
+      const result = savedCode.insertOne(codeEntry);
       res.status(201).json({message: 'code saved successfully', savedCode: result});
     } catch(error) {
       res.status(500).json({message:'Server Error', error: error.message});

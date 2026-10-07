@@ -15,7 +15,7 @@ const apiRouter = require('./routes/api');
 const loginrouter = require('./routes/login');
 
 
-function createApp(users, sessionSecret) {
+function createApp(users, storedCode) {
 const app = express();
 app.use(express.json());
 app.get('/index.html', (req, res, next) => {
@@ -24,13 +24,19 @@ app.get('/index.html', (req, res, next) => {
 });
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
+app.set('requireAuth', requireAuth);
+
+//add access to the app to read and write to the tables
+app.set('storedCode', storedCode);
+app.set('users', users);
+
 //set up view engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 //routes to use
 app.use('/login', loginrouter);
 app.use('/api', apiRouter);
-app.use('/', indexRouter);
+app.use('/', app.get('requireAuth'), indexRouter);
 
 return app;
 }
@@ -49,10 +55,7 @@ async function startServer() {
     const users = db.collection(process.env.USERS_COLLECTION || 'CSE');
     const storedCode = db.collection('storedCode');
 
-    const app = createApp(users, sessionSecret);
-    //add access to the app to read and write to the tables
-    app.set('storedCode', storedCode);
-    app.set('users', users);
+    const app = createApp(users, storedCode);
 
     console.log('Connected to MongoDB');
 

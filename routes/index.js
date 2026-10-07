@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
       userCodeName = req.query.codename;
       userFunction = await storedCode.find({userID: new ObjectId(CurrentUserID), codeName: userCodeName}).toArray();
     }
-    res.render('index', { title: 'Home', savedCode, userCodeName, userFunction});
+    res.render('index', { title: 'Home', savedCode, userCodeName, userFunction, CurrentUserID});
   } catch (error) {
     console.error(error);
     res.status(500).send('Error loading saved code');
