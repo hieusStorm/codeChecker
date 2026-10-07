@@ -100,7 +100,7 @@ router.post('/saveCode', async(req, res) => {
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const functionName = typeof body.codeName === 'string' ? body.codeName : '';
   const userCode = typeof body.code === 'string' ? body.code : '';
-  const hiddenUser = typeof body.currentUser === 'string' ? body.userCode : '';
+  const hiddenUser = typeof body.currentUser === 'string' ? body.currentUser : '';
   // make sure post data isn't empty
   if((functionName == '') || (userCode == '') || (hiddenUser == '')) throw new Error('Could not collect needed information');
   //collect user data
@@ -111,7 +111,7 @@ router.post('/saveCode', async(req, res) => {
   if (userSavedCodes) {
     // update code entry
     try{
-      const result = await savedCodes.updateOne(
+      const result = await savedCode.updateOne(
         {userID : user, codeName: functionName},
         {$set: {code: userCode}}
       );
