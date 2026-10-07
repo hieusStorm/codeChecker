@@ -1,6 +1,6 @@
 const express = require('express');
-const { ObjectId } = require("mongodb");
-const {readSession} = require("../session");
+const { ObjectId } = require('mongodb');
+const {readSession} = require('../session');
 
 const router = express.Router();
 
@@ -13,12 +13,12 @@ router.get('/', async (req, res) => {
   //pull the user info from the server
   try {
     // pull the saved code of the logged in user
-    const storedCode = req.app.get("storedCode");
+    const storedCode = req.app.get('storedCode');
     const CurrentUserID = req.session.userId;
     const savedCode = await storedCode.find({userID: new ObjectId(CurrentUserID)}).toArray();
     //check to see if loading previously saved code
-    let userCodeName = "";
-    let userFunction = "";
+    let userCodeName = '';
+    let userFunction = '';
     if(req.query.codename) {
       userCodeName = req.query.codename;
       userFunction = await storedCode.find({userID: new ObjectId(CurrentUserID), codeName: userCodeName}).toArray();
