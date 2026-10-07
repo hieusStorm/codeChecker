@@ -24,16 +24,13 @@ app.get('/index.html', (req, res, next) => {
 });
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-//make session information readable to the whole app
-app.set('requireAuth', requireAuth);
-
 //set up view engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 //routes to use
 app.use('/login', loginrouter);
 app.use('/api', apiRouter);
-app.use('/', app.get('requireAuth'), indexRouter);
+app.use('/', indexRouter);
 
 return app;
 }
@@ -46,7 +43,7 @@ async function startServer() {
   }
   const client = new MongoClient(process.env.MONGODB_URI);
   try {
-    // connect to the databasew
+    // connect to the database
     await client.connect();
     const db = client.db(process.env.DB_NAME);
     const users = db.collection(process.env.USERS_COLLECTION || 'CSE');
