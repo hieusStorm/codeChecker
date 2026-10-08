@@ -13,6 +13,7 @@ require('dotenv').config();
 const indexRouter = require('./routes/index');
 const apiRouter = require('./routes/api');
 const loginrouter = require('./routes/login');
+const signUpRouter = require('./routes/signUp');
 
 
 function createApp(users, storedCode) {
@@ -35,6 +36,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 //routes to use
 app.use('/login', loginrouter);
+app.use('/signup', signUpRouter);
 app.use('/api', apiRouter);
 app.use('/', app.get('requireAuth'), indexRouter);
 

@@ -95,6 +95,38 @@ router.post('/logout', (_req, res) => {
   res.json({ message: 'Logged out' });
 });
 
+//sign up
+router.post("/signup", async (req, res) => {
+  const body = req.body && typeof req.body === "object" ? req.body : {};
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";
+  const lastName = typeof body.lastName === "string" ? body.lastName.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const users = req.app.get('users');
+  if (!firstName || firstName.length > 80 || lastName.length > 80 ||
+      email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: "Enter your first name and a valid email address. Names must be 80 characters or fewer." });
+  }
+  if (password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
+    return res.status(400).json({ message: "Password must be at least 8 characters and no more than 72 bytes." });
+  }
+  try {
+    if (await users.findOne({ email })) {
+      return res.status(409).json({ message: "An account with this email already exists. Please sign in." });
+    }
+    const passwordHash = await bcrypt.hash(password, 12);
+    await users.insertOne({ email, firstName, lastName, passwordHash,
+      role: "user", isActive: true, createdAt: new Date() });
+    res.status(201).json({ message: "Account created. Please sign in." });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "An account with this email already exists. Please sign in." });
+    }
+    console.error("Registration failed:", error.message);
+    res.status(500).json({ message: "Unable to create your account. Please try again." });
+  }
+});
+
 router.post('/saveCode', async(req, res) => {
   // collect post data
   const body = req.body && typeof req.body === 'object' ? req.body : {};
