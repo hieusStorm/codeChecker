@@ -1,6 +1,5 @@
-const loginForm = document.querySelector("#loginForm");
-const codeInput = document.getElementById("codeEditor");
-const copyButton = document.getElementById("copyButton");
+const signupForm = document.querySelector("#signupForm");
+const loginForm = signupForm || document.querySelector("#loginForm");
 
 if (loginForm) {
   const email = document.querySelector("#email");
@@ -16,6 +15,10 @@ if (loginForm) {
     toggle.setAttribute("aria-label", showing ? "Show password" : "Hide password");
   });
 
+  if (!signupForm && new URLSearchParams(window.location.search).has("registered")) {
+    error.textContent = "Account created! Sign in to continue.";
+  }
+
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     error.textContent = "";
@@ -24,24 +27,29 @@ if (loginForm) {
       return;
     }
 
+    if (signupForm && password.value !== document.querySelector("#confirmPassword").value) {
+      error.textContent = "Passwords do not match.";
+      return;
+    }
     button.disabled = true;
-    button.textContent = "Signing in...";
+    button.textContent = signupForm ? "Creating account..." : "Signing in...";
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch(signupForm ? "/api/signup" : "/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.value, password: password.value })
+        body: JSON.stringify({ email: email.value, password: password.value,
+          ...(signupForm ? { firstName: document.querySelector("#firstName").value, lastName: document.querySelector("#lastName").value } : {}) })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Unable to sign in");
-      window.location.assign("/");
+      window.location.assign(signupForm ? "/login?registered=1" : "/");
     } catch (requestError) {
       error.textContent = requestError.message === "Failed to fetch"
         ? "Cannot reach the server. Please try again."
         : requestError.message;
     } finally {
       button.disabled = false;
-      button.textContent = "Sign in";
+      button.textContent = signupForm ? "Create account" : "Sign in";
     }
   });
 }
@@ -49,8 +57,13 @@ if (loginForm) {
 const logoutButton = document.querySelector("#logoutButton");
 if (logoutButton) {
   logoutButton.addEventListener("click", async () => {
-    await fetch("/api/logout", { method: "POST" });
-    window.location.assign("/login");
+    try {
+      const response = await fetch("/api/logout", { method: "POST" });
+      if (!response.ok) throw new Error("Unable to sign out");
+      window.location.assign("/login");
+    } catch {
+      welcomeMessage.textContent = "Unable to sign out. Please try again.";
+    }
   });
 }
 
