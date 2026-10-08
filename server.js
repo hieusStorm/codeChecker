@@ -38,6 +38,11 @@ app.use('/login', loginrouter);
 app.use('/api', apiRouter);
 app.use('/', app.get('requireAuth'), indexRouter);
 
+app.use((error, _req, res, _next) => {
+  const status = error.status === 400 || error.status === 413 ? error.status : 500;
+  res.status(status).json({ message: status === 400 ? "Invalid JSON request" :
+    status === 413 ? "Request is too large" : "Server error. Please try again." });
+});
 return app;
 }
 
