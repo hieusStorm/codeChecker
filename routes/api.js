@@ -145,7 +145,7 @@ router.post('/saveCode', async(req, res) => {
     try{
       const result = await savedCode.updateOne(
         {userID : user, codeName: functionName},
-        {$set: {code: userCode}}
+        {$set: {code: userCode, input: String(body.input || ''), expected: String(body.expected || ''), updatedAt: new Date()}}
       );
       res.status(200).json({message:'Code Changes Saved'});
     }catch(error){
@@ -158,9 +158,13 @@ router.post('/saveCode', async(req, res) => {
         _id: new ObjectId(),
         userID: user,
         code: userCode,
-        codeName: functionName
+        codeName: functionName,
+        input: String(body.input || ''),
+        expected: String(body.expected || ''),
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
-      const result = savedCode.insertOne(codeEntry);
+      const result = await savedCode.insertOne(codeEntry);
       res.status(201).json({message: 'code saved successfully', savedCode: result});
     } catch(error) {
       res.status(500).json({message:'Server Error', error: error.message});

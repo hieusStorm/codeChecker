@@ -13,7 +13,9 @@ saveButton.addEventListener('click', async (event)=> {
         const response = await fetch('api/saveCode', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({code: codeValue, codeName: functionName, currentUser: hiddenUser.value})
+            body: JSON.stringify({code: codeValue, codeName: functionName, currentUser: hiddenUser.value,
+            input: document.getElementById('inputEditor').value,
+            expected: document.getElementById('expectedEditor').value})
         });
         const result = await response.json();
         console.log(result);
