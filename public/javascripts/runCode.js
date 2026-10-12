@@ -10,8 +10,8 @@ function displayOutput(value) {
   const serialized = JSON.stringify(value, null, 2);
   document.getElementById("outputDisplay").textContent = serialized === undefined ? String(value) : serialized;
 }
-const runCodeButton = document.getElementById("runButton");
-runCodeButton.addEventListener("click", async () => {
+  const runCodeButton = document.getElementById("runButton");
+  runCodeButton.addEventListener("click", async () => {
   runCodeButton.disabled = true;
   const badge = document.getElementById("runBadge");
   try {
@@ -30,7 +30,7 @@ runCodeButton.addEventListener("click", async () => {
 const initialInput = document.getElementById("inputEditor").value;
 document.getElementById("resetButton").addEventListener("click", () => {
   document.getElementById("inputEditor").value = initialInput;
-
+})
 //display the output of the code
 function displayOutput(codeFunction) {
     const outPutElement = document.getElementById("outputDisplay").firstChild;
@@ -50,7 +50,7 @@ function compareResults(actualResult) {
 }
 
 //event listeners
-const runCodeButton = document.getElementById('runButton');
+// const runCodeButton = document.getElementById('runButton');
     runCodeButton.addEventListener('click', ()=> { 
     const actualResult = runCode();
 
@@ -72,4 +72,34 @@ const runCodeButton = document.getElementById('runButton');
         runBadge.style.color = '#dc2626';
         outputMessage.textContent = 'Result does not match expected output';
     }
+
+    updateTestDetails(passed);
 });
+
+// Might need to be moved to another script not sure yet
+const resetInputsButton = document.getElementById('resetButton');
+resetInputsButton.addEventListener('click', ()=> document.getElementById('inputEditor').value = '');
+
+// Details Box
+// Temporary counter until run history is connected to MongoDB
+let runCount = 0;
+
+function updateTestDetails(passed) {
+    const testStatus = document.getElementById('testStatus');
+    const lastRun = document.getElementById('lastRun');
+    const runCountElement = document.getElementById('runCount');
+
+    if(passed) {
+        testStatus.innerHTML = '<span class="green-dot"></span> Passed';
+    } else {
+        testStatus.innerHTML = '<span class="red-dot"></span> Failed'
+    }
+
+    lastRun.textContent = new Date().toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit'
+    });
+
+    runCount++;
+    runCountElement.textContent = runCount;
+}

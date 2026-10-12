@@ -16,6 +16,7 @@
     <script src="javascripts/runCode.js" defer></script>
     <script src="javascripts/exportCode.js" defer></script>
     <script src="javascripts/saveCode.js" defer></script>
+    <script src="javascripts/tests.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -110,7 +111,7 @@
                 <button class="text-button" type="button" id="formatButton">Format JSON</button>
               </div>
               <label class="sr-only" for="inputEditor">function arguments</label>
-              <textarea class="json-editor" id="inputEditor" spellcheck="false" placeholder="Enter Function arguments Here"></textarea>
+              <textarea class="json-editor" id="inputEditor" spellcheck="false" placeholder="Enter Function arguments Here"><%= userFunction[0] ? userFunction[0].input || '' : '' %></textarea>
               <div class="input-footer">
                 <span class="type-label">Object</span>
                 <button class="text-button" type="button" id="resetButton">Reset input</button>
@@ -126,7 +127,7 @@
 
               <label class="sr-only" for="expectedEditor">Expected function result</label>
 
-              <textarea class="json-editor" id="expectedEditor" spellcheck="false" placeholder="Enter expected output here"></textarea>
+              <textarea class="json-editor" id="expectedEditor" spellcheck="false" placeholder="Enter expected output here"><%= userFunction[0] ? userFunction[0].expected || '' : '' %></textarea>
 
               <div class="input-footer">
                 <span class="type-label">Object</span>
