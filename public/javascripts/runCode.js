@@ -50,13 +50,13 @@ function compareResults(actualResult) {
 }
 
 //event listeners
-// const runCodeButton = document.getElementById('runButton');
     runCodeButton.addEventListener('click', ()=> { 
     const actualResult = runCode();
 
     displayOutput(actualResult);
 
     const passed = compareResults(actualResult);
+    if (window.saveRunResult) window.saveRunResult(passed);
 
     const runBadge = document.getElementById('runBadge');
     const outputMessage = document.getElementById('outputMessage');
@@ -82,24 +82,33 @@ resetInputsButton.addEventListener('click', ()=> document.getElementById('inputE
 
 // Details Box
 // Temporary counter until run history is connected to MongoDB
-let runCount = 0;
+let runCount = Number(document.getElementById('runCount')?.textContent) || 0;
 
 function updateTestDetails(passed) {
     const testStatus = document.getElementById('testStatus');
     const lastRun = document.getElementById('lastRun');
     const runCountElement = document.getElementById('runCount');
 
-    if(passed) {
-        testStatus.innerHTML = '<span class="green-dot"></span> Passed';
-    } else {
-        testStatus.innerHTML = '<span class="red-dot"></span> Failed'
+    if (testStatus) {
+        testStatus.innerHTML = passed
+            ? '<span class="green-dot"></span> Passed'
+            : '<span class="red-dot"></span> Failed';
     }
 
-    lastRun.textContent = new Date().toLocaleTimeString([], {
-        hour: 'numeric',
-        minute: '2-digit'
-    });
+    if (lastRun) {
+        // same format the server uses, e.g. "Oct 14, 10:42 AM"
+        lastRun.textContent = new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
 
-    runCount++;
-    runCountElement.textContent = runCount;
+    // only count runs of saved tests, matching what the server stores
+    const isSaved = new URLSearchParams(location.search).get('codename');
+    if (runCountElement && isSaved) {
+        runCount++;
+        runCountElement.textContent = runCount;
+    }
 }

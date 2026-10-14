@@ -15,7 +15,8 @@ saveButton.addEventListener('click', async (event)=> {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({code: codeValue, codeName: functionName, currentUser: hiddenUser.value,
             input: document.getElementById('inputEditor').value,
-            expected: document.getElementById('expectedEditor').value})
+            expected: document.getElementById('expectedEditor').value,
+        })
         });
         const result = await response.json();
         console.log(result);

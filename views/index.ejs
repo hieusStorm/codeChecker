@@ -17,6 +17,7 @@
     <script src="javascripts/exportCode.js" defer></script>
     <script src="javascripts/saveCode.js" defer></script>
     <script src="javascripts/tests.js" defer></script>
+    <script src="javascripts/runStats.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -145,7 +146,7 @@
                 </span>
               </div>
               <pre class="output-display" id="outputDisplay"><code></code></pre>
-              <div class="output-footer"><span class="green-dot"></span><span id="outputMessage">Function completed successfully</span><span class="duration">42ms</span></div>
+              <div class="output-footer"><span class="green-dot"></span><span id="outputMessage">The function has not yet been tested</span><span class="duration">42ms</span></div>
             </section>
             <aside class="details-card card">
               <div class="card-header">
@@ -156,10 +157,21 @@
                 <button class="more-button" type="button" aria-label="More test options">•••</button>
               </div>
               <dl class="metadata">
-                <div><dt>Status</dt><dd><span class="green-dot"></span> Ready</dd></div>
-                <div><dt>Created</dt><dd>Aug 24, 2024</dd></div>
-                <div><dt>Last run</dt><dd id="lastRun">Today, 10:42 AM</dd></div>
-                <div><dt>Runs this month</dt><dd>18</dd></div>
+                <%
+                  const test = userFunction[0];
+                  const status = test && test.lastStatus ? test.lastStatus : 'Ready';
+                  const dot = status === 'Failed' ? 'red-dot' : 'green-dot';
+                  const lastRunText = test && test.lastRunAt
+                    ? new Date(test.lastRunAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                    : 'Never';
+                %>
+                <div><dt>Status</dt><dd id="testStatus"><span class="<%= dot %>"></span> <%= status %></dd></div>
+                <%
+                  const created = test ? (test.createdAt || test._id.getTimestamp()) : null;
+                %>
+                <div><dt>Created</dt><dd><%= created ? new Date(created).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—' %></dd></div>
+                <div><dt>Last run</dt><dd id="lastRun"><%= lastRunText %></dd></div>
+                <div><dt>Total runs</dt><dd id="runCount"><%= test && test.runCount ? test.runCount : 0 %></dd></div>
               </dl>
               <div class="tag-list"><span class="tag">transform</span><span class="tag">user-data</span><button type="button" class="add-tag">+</button></div>
             </aside>

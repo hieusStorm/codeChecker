@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   try {
     // pull the saved code of the logged in user
     const storedCode = req.app.get('storedCode');
-    const CurrentUserID = req.session.userId;
+    const CurrentUserID = session.userId;
     const savedCode = await storedCode.find({userID: new ObjectId(CurrentUserID)}).toArray();
     //check to see if loading previously saved code
     let userCodeName = '';

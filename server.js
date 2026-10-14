@@ -38,7 +38,12 @@ app.set('view engine', 'ejs');
 app.use('/login', loginrouter);
 app.use('/signup', signUpRouter);
 app.use('/api', apiRouter);
-app.use('/', app.get('requireAuth'), indexRouter);
+app.use('/', (req, res, next) => {
+  if (!readSession(req)) {
+    return res.redirect('/login');
+  }
+  next();
+}, indexRouter);
 
 app.use((error, _req, res, _next) => {
   const status = error.status === 400 || error.status === 413 ? error.status : 500;

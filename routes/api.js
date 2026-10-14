@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const { ObjectId, MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 const {parseCookies, createSession, readSession, requireAuth} = require('../session');
@@ -80,6 +81,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/me', requireAuth, async (req, res) => {
+  const users = req.app.get('users');
   const user = await users.findOne(
     { _id: new ObjectId(req.session.userId) },
     { projection: { passwordHash: 0 } }
@@ -169,6 +171,27 @@ router.post('/saveCode', async(req, res) => {
     } catch(error) {
       res.status(500).json({message:'Server Error', error: error.message});
     }
+  }
+});
+
+router.post('/runResult', requireAuth, async (req, res) => {
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const codeName = typeof body.codeName === 'string' ? body.codeName : '';
+  if (!codeName) return res.status(400).json({ ok: false, message: 'Missing test name' });
+
+  try {
+    const result = await req.app.get('storedCode').updateOne(
+      { userID: new ObjectId(req.session.userId), codeName },
+      {
+        $set: { lastRunAt: new Date(), lastStatus: body.passed === true ? 'Passed' : 'Failed' },
+        $inc: { runCount: 1 },
+      }
+    );
+    if (!result.matchedCount) return res.status(404).json({ ok: false, message: 'Save the test first' });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Saving run result failed:', error);
+    res.status(500).json({ ok: false, message: 'Server error' });
   }
 });
 
